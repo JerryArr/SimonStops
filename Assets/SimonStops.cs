@@ -600,9 +600,7 @@ public class SimonStops : MonoBehaviour
     private void FixedUpdate()
     {
         if (isSolved)
-        {
-		
-        }
+            return;
         else
         {
             switch (currentState)
@@ -685,7 +683,7 @@ public class SimonStops : MonoBehaviour
                     {
                         controlTimeLeft = controlTimeLimit;
                         currentLightCycle = 0;
-                        
+
                         for (int lo = 0; lo < 6; lo++)
                         {
                             lights[lo].enabled = false;
@@ -817,24 +815,6 @@ public class SimonStops : MonoBehaviour
             }
         }
     }
-	
-	void TwitchHandleForcedSolve()
-	{
-		Debug.LogFormat("[Simon Stops #{0}] Twitch Plays demands an auto-solve, skipping all stages.", _moduleId);
-        string[] tpFS = new string[7] { "t", "p", "s", "o", "l", "v", "e" };
-        outputSequence = tpFS;	//Make sure Souvenir doesn't ask about an auto-solved Simon Stops.			
-		stageNum = 4;
-		currentStagePresses = 0;
-		for (int lo = 0; lo < 6; lo++)
-		{
-			lights[lo].enabled = false;
-		}
-		currentState = 3;
-		pressedAllowed = false;
-		isSolved = true;
-		Module.HandlePass();
-	}
-	
 
     void pressButton(int b)
     {
@@ -937,11 +917,6 @@ public class SimonStops : MonoBehaviour
         }
     }
 
-    void doSubmit()
-    {
-
-    }
-
     void delegationZone()
     {
         //Module.
@@ -965,6 +940,13 @@ public class SimonStops : MonoBehaviour
         button[5].OnInteractEnded += delegate () { OnRelease(); };
     }
 
-    
-
+    private IEnumerator TwitchHandleForcedSolve()
+    {
+        while (!isSolved)
+        {
+            button["ROYGBV".IndexOf(expectedInput.Substring(currentStagePresses, 1).ToUpperInvariant())].OnInteract();
+            yield return new WaitForSeconds(0.175f);
+        }
+        yield break;
+    }
 }
